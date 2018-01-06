@@ -1,12 +1,14 @@
 var Web3 = require('web3')
 var fs = require('fs')
 // var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+var keythereum = require("keythereum");
+var Tx = require("ethereumjs-tx");
+
 
 //chain on r715
 var web3 = new Web3(new Web3.providers.HttpProvider('http://140.119.163.105:8545'));
 
 var eth = web3.eth;
-
 
 //generate contractData from contract_abi & contract_bytecode
 var contract_abi = JSON.parse(
@@ -15,29 +17,44 @@ var contract_abi = JSON.parse(
 var contract_bytecode =
   "0x" + fs.readFileSync("Test.bin", "utf8");
 
-// const test = web3.eth.contract(contract_abi)
 
-// test.new({
-//   from: eth.coinbase,
-//   data: contract_bytecode,
-//   value: web3.toWei("10", "ether"),
-//   gas: 1000000
-// }, function(err, contract) {
-//   if(typeof contract.address !== 'undefined') {
-//     console.log(contract.address)
-//     console.log(contract.transactionHash);
-//   }
-// })
+// 欲獲得之 address
+var user_address = "0x52da64497cc678d5fe56379e93fbc3a25293b0cc";
+console.log(user_address)
+var user_password = "techfin"
 
-const test = web3.eth.contract(contract_abi).at("0xff78b08c0307ddc9c5dac4cc2caddcae328a3eda")
+// find file form __dirname + '/keystore' => assign file address to import file
+//__dirname 是node js 裡面預設的變數 它會抓你現在的path 不包含檔案名稱
+var keyObject = keythereum.importFromFile(user_address, __dirname);
 
-const want = test.getContractBalance()
-
-// console.log(want)
+//算出 privateKey
+var privateKey = keythereum.recover(user_password, keyObject); 
 
 
-// const receipt = web3.eth.getTransactionReceipt("0xe1fccdecc0269b94fc1f0493843c416bd3ffe7b15de4dfcfddbbad4e6e96642a")
-// console.log(receipt)
+const Test = eth.contract(contract_abi);
 
-// console.log(eth.coinbase)
+const contractData = Test.new.getData({
+  data: contract_bytecode
+});
 
+var rawTx = {
+  //nonce => maintain by ourself
+  nonce: web3.eth.getTransactionCount(user_address),
+  value: web3.toWei("10", "ether"),
+  gasLimit: 1000000,
+  data: contractData
+};
+
+// using ethereumjs-tx function
+var tx = new Tx(rawTx);
+
+//sign your transaction
+tx.sign(privateKey);
+
+//unknown function need to check
+var serializedTx = tx.serialize();
+
+var txhash = web3.eth.sendRawTransaction("0x" + serializedTx.toString("hex"));
+// var receipt = web3.eth.getTransactionReceipt(txhash)
+
+console.log(txhash)
