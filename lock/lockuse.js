@@ -5,6 +5,8 @@ var keythereum = require("keythereum");
 var Tx = require("ethereumjs-tx");
 var info = require('./info.js');
 
+var BigNumber = require('bignumber.js')
+
 //chain on r715
 var web3 = new Web3(new Web3.providers.HttpProvider('http://140.119.163.105:8545'));
 
@@ -26,19 +28,20 @@ var user_password = info.user_password;
 var keyObject = keythereum.importFromFile(user_address, __dirname);
 
 // 算出 privateKey
-var privateKey = keythereum.recover(user_password, keyObject); 
+var privateKey = keythereum.recover(user_password, keyObject);
 
-const contract_address = "0x1d89412f46a157617e640b9b726c7bc5039e55f3"
 
-const Lock = eth.contract(contract_abi).at("0x1d89412f46a157617e640b9b726c7bc5039e55f3");
+const Lock = eth.contract(contract_abi).at("0x5fe0f132b00c99f4f25395c9455c111bd5a149e4");
 
 function book() {
-  Lock.book(info.user_address, "1234556", "endtime", {
-    from: eth.coinbase, 
+  Lock.book(info.user_address, {
+    from: eth.coinbase,
     gas: 1000000
-  },function(err, txhash) {
-    if(!err) {
+  }, function (err, txhash) {
+    if (!err) {
       console.log(txhash)
+    } else {
+      console.log(err)
     }
   })
 }
@@ -55,23 +58,51 @@ function iflife() {
 
 function setLock() {
   Lock.setlock("367838", {
-    from: eth.coinbase, 
-    gas: 1000000,
-    value: web3.toWei("1.00001", "ether")
+    from: eth.coinbase,
+    gas: 1000000
+    // value: web3.toWei("1.00001", "ether")
   }, function (err, txhash) {
-    if(!err) {
+    if (!err) {
       console.log(txhash)
+    }
+    else {
+      console.log(err)
     }
   })
 }
 
-function getLock() {
-  var result = Lock.availableStartTime()
+function getPricePerDay() {
+  var result = new BigNumber(Lock.pricePerDay())
+  result = result.plus(21).toString(10);
   console.log(result)
 }
 
+function userEndTime() {
+  var result = Lock.life();
+  console.log(result)
+}
 // setLock()
 // ifbook()
 
-iflife()
+// iflife()
 
+function testall() {
+  var output = {}
+  output.admin = Lock.admin();
+  output.life = Lock.life();
+  output.host = Lock.host();
+
+  var temp = new BigNumber(Lock.pricePerDay());
+  temp = temp.toString()
+
+  output.pricePerDay = temp;
+  output.ifbook = Lock.ifbook();
+  output.user = Lock.user();
+  output.locendblock = Lock.lockendblock();
+
+  console.log(output)
+}
+
+// book()
+// testall();
+setLock();

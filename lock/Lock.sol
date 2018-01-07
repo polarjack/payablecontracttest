@@ -5,15 +5,11 @@ contract Lock {
   bool public life;
 
   address public host;
-  string public availableStartTime;
-  string public availableEndTime;
   uint public pricePerDay;
   bool public ifbook;
   
   address public user;
-  string public validStartTime;
-  string public validEndTime;
-
+ 
   string public lockendblock;
 
   modifier onlyadmin() {
@@ -31,41 +27,34 @@ contract Lock {
     _;
   }
 
-  function Lock(address _host, string _startTime, string  _endTime, uint _price) public {
+  function Lock(address _host, uint _price) public {
     admin = msg.sender;
 
     host = _host;
-    availableStartTime = _startTime;
-    availableEndTime = _endTime;
     pricePerDay = _price;
-    
+
     life = true;
     ifbook = false;
 
     lockendblock = "null";
   }
 
-  function book(address _user, string _startTime, string _endTime) public {
+  function book(address _user) public {
     user = _user;
-    validStartTime = _startTime;
-    validEndTime = _endTime;
     ifbook = true;
   }
 
   function cancel(address _user) public {
     require(user == _user);
     user = 0x0;
-    validStartTime = "";
-    validEndTime = "";
     ifbook = false;
   }
 
-  function disableContract() public onlyadmin {
+  function disableContract() public {
     life = false;
   }
 
-  function setlock(string _blockNumber) public payable {
-    require(msg.value > 1 ether);
+  function setlock(string _blockNumber) public onlyadmin onlyhost {
     lockendblock = _blockNumber;
   }
 }

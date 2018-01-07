@@ -22,44 +22,63 @@ var contract_bytecode =
 var user_address = info.host_address;
 var user_password = info.host_password;
 
-// find file form __dirname + '/keystore' => assign file address to import file
-// __dirname 是node js 裡面預設的變數 它會抓你現在的path 不包含檔案名稱
-var keyObject = keythereum.importFromFile(user_address, __dirname);
-
-// 算出 privateKey
-var privateKey = keythereum.recover(user_password, keyObject); 
 
 const Lock = eth.contract(contract_abi);
 
-console.log(info.host_address);
 
-const contractData = Lock.new.getData(info.host_address, "11111", "22222", 500, {
-  data: contract_bytecode
-})
+function deploy() {
+  Lock.new(info.host_address, 500, {
+    from: eth.coinbase,
+    data: contract_bytecode,
+    gas: 1000000
+  }, function (err, contract) {
+    if (typeof contract.address != 'undefined') {
+      console.log("Address: " + contract.address + " Transaction Hash: " + contract.transactionHash);
+    } else {
+      console.log(err)
+    }
+  })
+}
 
+function rawtx() {
 
-var rawTx = {
-  //nonce => maintain by ourself
-  nonce: web3.eth.getTransactionCount(user_address),
-  gasLimit: 1000000,
-  data: contractData
-};
+  // find file form __dirname + '/keystore' => assign file address to import file
+  // __dirname 是node js 裡面預設的變數 它會抓你現在的path 不包含檔案名稱
+  var keyObject = keythereum.importFromFile(user_address, __dirname);
 
-// using ethereumjs-tx function
-var tx = new Tx(rawTx);
+  // 算出 privateKey
+  var privateKey = keythereum.recover(user_password, keyObject);
 
-//sign your transaction
-tx.sign(privateKey);
+  const contractData = Lock.new.getData(info.host_address, 500, {
+    data: contract_bytecode
+  })
 
-//unknown function need to check
-var serializedTx = tx.serialize();
+  var rawTx = {
+    // nonce => maintain by ourself
+    nonce: web3.eth.getTransactionCount(user_address),
+    gasLimit: 1000000,
+    data: contractData
+  };
 
-var txhash = web3.eth.sendRawTransaction("0x" + serializedTx.toString("hex"));
-// var receipt = web3.eth.getTransactionReceipt(txhash)
+  // using ethereumjs-tx function
+  var tx = new Tx(rawTx);
 
-console.log(txhash)
+  //sign your transaction
+  tx.sign(privateKey);
 
-setTimeout(()=> {
-  var receipt = web3.eth.getTransactionReceipt(txhash)
-  console.log(receipt.contractAddress)
-}, 7000)
+  //unknown function need to check
+  var serializedTx = tx.serialize();
+
+  var txhash = web3.eth.sendRawTransaction("0x" + serializedTx.toString("hex"));
+  // var receipt = web3.eth.getTransactionReceipt(txhash)
+
+  console.log(txhash)
+
+  setTimeout(() => {
+    var receipt = web3.eth.getTransactionReceipt(txhash)
+    console.log(receipt.contractAddress)
+  }, 5000)
+
+}
+
+rawtx()
