@@ -2,19 +2,19 @@ pragma solidity ^0.4.11;
 
 contract Lock {
   address public admin;
-  bool life;
+  bool public life;
 
   address public host;
   string public availableStartTime;
   string public availableEndTime;
   uint public pricePerDay;
   bool public ifbook;
-
+  
   address public user;
   string public validStartTime;
   string public validEndTime;
 
-  string lockendblock;
+  string public lockendblock;
 
   modifier onlyadmin() {
     require(admin == msg.sender);
@@ -41,6 +41,8 @@ contract Lock {
     
     life = true;
     ifbook = false;
+
+    lockendblock = "null";
   }
 
   function book(address _user, string _startTime, string _endTime) public {
@@ -62,12 +64,8 @@ contract Lock {
     life = false;
   }
 
-  function setlock(string _blockNumber) public {
+  function setlock(string _blockNumber) public payable {
+    require(msg.value > 1 ether);
     lockendblock = _blockNumber;
-  }
-
-  function getlock() public view returns (string) {
-    require(user == msg.sender);
-    return lockendblock;
   }
 }

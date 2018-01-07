@@ -17,10 +17,9 @@ var contract_abi = JSON.parse(
 var contract_bytecode =
   "0x" + fs.readFileSync("Lock.bin", "utf8");
 
-
 // 欲獲得之 address
-var user_address = info.host_address;
-var user_password = info.host_password;
+var user_address = info.user_address;
+var user_password = info.user_password;
 
 // find file form __dirname + '/keystore' => assign file address to import file
 // __dirname 是node js 裡面預設的變數 它會抓你現在的path 不包含檔案名稱
@@ -29,37 +28,50 @@ var keyObject = keythereum.importFromFile(user_address, __dirname);
 // 算出 privateKey
 var privateKey = keythereum.recover(user_password, keyObject); 
 
-const Lock = eth.contract(contract_abi);
+const contract_address = "0x1d89412f46a157617e640b9b726c7bc5039e55f3"
 
-console.log(info.host_address);
+const Lock = eth.contract(contract_abi).at("0x1d89412f46a157617e640b9b726c7bc5039e55f3");
 
-const contractData = Lock.new.getData(info.host_address, "11111", "22222", 500, {
-  data: contract_bytecode
-})
+function book() {
+  Lock.book(info.user_address, "1234556", "endtime", {
+    from: eth.coinbase, 
+    gas: 1000000
+  },function(err, txhash) {
+    if(!err) {
+      console.log(txhash)
+    }
+  })
+}
 
+function ifbook() {
+  var result = Lock.ifbook()
+  console.log(result)
+}
 
-var rawTx = {
-  //nonce => maintain by ourself
-  nonce: web3.eth.getTransactionCount(user_address),
-  gasLimit: 1000000,
-  data: contractData
-};
+function iflife() {
+  var result = Lock.life()
+  console.log(result)
+}
 
-// using ethereumjs-tx function
-var tx = new Tx(rawTx);
+function setLock() {
+  Lock.setlock("367838", {
+    from: eth.coinbase, 
+    gas: 1000000,
+    value: web3.toWei("1.00001", "ether")
+  }, function (err, txhash) {
+    if(!err) {
+      console.log(txhash)
+    }
+  })
+}
 
-//sign your transaction
-tx.sign(privateKey);
+function getLock() {
+  var result = Lock.availableStartTime()
+  console.log(result)
+}
 
-//unknown function need to check
-var serializedTx = tx.serialize();
+// setLock()
+// ifbook()
 
-var txhash = web3.eth.sendRawTransaction("0x" + serializedTx.toString("hex"));
-// var receipt = web3.eth.getTransactionReceipt(txhash)
+iflife()
 
-console.log(txhash)
-
-setTimeout(()=> {
-  var receipt = web3.eth.getTransactionReceipt(txhash)
-  console.log(receipt.contractAddress)
-}, 7000)
