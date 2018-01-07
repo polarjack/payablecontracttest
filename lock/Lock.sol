@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-contract Lock {
+contract Agreement {
   address public admin;
   bool public life;
 

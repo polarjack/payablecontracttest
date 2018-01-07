@@ -31,7 +31,7 @@ var keyObject = keythereum.importFromFile(user_address, __dirname);
 var privateKey = keythereum.recover(user_password, keyObject);
 
 
-const Lock = eth.contract(contract_abi).at("0x5fe0f132b00c99f4f25395c9455c111bd5a149e4");
+const Lock = eth.contract(contract_abi).at("0x70d504bd8265d8f13e8b96c1e0e5480132734a9b");
 
 function book() {
   Lock.book(info.user_address, {
@@ -63,6 +63,20 @@ function setLock() {
     // value: web3.toWei("1.00001", "ether")
   }, function (err, txhash) {
     if (!err) {
+      console.log(txhash)
+    }
+    else {
+      console.log(err)
+    }
+  })
+}
+
+function cancel() {
+  Lock.cancel(info.user_address,{
+    from: eth.coinbase,
+    gas: 1000000
+  } ,function (err, txhash) {
+    if(!err) {
       console.log(txhash)
     }
     else {
@@ -104,5 +118,7 @@ function testall() {
 }
 
 // book()
-// testall();
-setLock();
+// cancel();
+// setLock();
+
+testall()
