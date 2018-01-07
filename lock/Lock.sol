@@ -31,7 +31,7 @@ contract Lock {
     _;
   }
 
-  function Agreement(address _host, string _startTime, string  _endTime, uint _price) public {
+  function Lock(address _host, string _startTime, string  _endTime, uint _price) public {
     admin = msg.sender;
 
     host = _host;
