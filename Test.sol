@@ -1,30 +1,33 @@
 pragma solidity ^0.4.11;
 
 contract Test {
-  address owner; 
-  uint logbalance;
+  address public owner; 
+  uint public logbalance;
 
-  uint registblock;
+  string public registblock;
 
-  function Test() public payable{
+  function Test() public payable {
     owner = msg.sender;
     logbalance = msg.value;
-    registblock = block.number;
   }
 
   function getContractBalance() public returns (uint) {
     return logbalance;
   }
 
-  function getBalance() public returns (uint) {
+  function getBalance() constant public returns (uint) {
     return this.balance;
   }
 
-  function addMoney() public {
+  function addMoney() public payable {
     logbalance = this.balance;
   }
 
-  function getBlockNumber() public returns (uint) {
+  function updateBlockNumber(string _block) public {
+    registblock = _block;
+  }
+
+  function getBlockNumber() constant public returns (string) {
     return registblock;
   }
 }

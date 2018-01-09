@@ -5,11 +5,10 @@ var web3 = new Web3(new Web3.providers.HttpProvider('http://140.119.163.105:8545
 var eth = web3.eth;
 
 // this is txhash
-var tofind = "0x6ec34bcb0642c301c051518132e6c87fd1edf69d728fc709f47e283d24d2a5ed"
+var tofind = "0x6675a2aa569f7af5a68041ae7d12a77a19fb865186193c01eb63167492101991"
 
 
 var result = web3.eth.getTransactionReceipt(tofind)
-
 
 console.log(result)
 

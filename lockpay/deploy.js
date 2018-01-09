@@ -44,6 +44,10 @@ function rawtx() {
 
   var user_address = "0x7bb2b8512feffb423ae62618042c9ca50f4467f9";
   var user_password = "123456"
+
+  // var user_address = eth.coinbase;
+  // var user_password = "techfin"
+
   // find file form __dirname + '/keystore' => assign file address to import file
   // __dirname 是node js 裡面預設的變數 它會抓你現在的path 不包含檔案名稱
   var keyObject = keythereum.importFromFile(user_address, __dirname);
@@ -51,7 +55,7 @@ function rawtx() {
   // 算出 privateKey
   var privateKey = keythereum.recover(user_password, keyObject);
 
-  const contractData = Lock.new.getData({
+  const contractData = Lock.new.getData(eth.coinbase ,{
     data: contract_bytecode
   })
 
@@ -59,7 +63,8 @@ function rawtx() {
     // nonce => maintain by ourself
     nonce: web3.eth.getTransactionCount(user_address),
     gasLimit: 1000000,
-    data: contractData
+    data: contractData,
+    value: 10000000000000000
   };
 
   // using ethereumjs-tx function
@@ -80,7 +85,6 @@ function rawtx() {
     var receipt = web3.eth.getTransactionReceipt(txhash)
     console.log(receipt.contractAddress)
   }, 6000)
-
 }
 
 rawtx()
